@@ -1,37 +1,37 @@
-const connection = require('./connection');
+const pool = require('./connection');
 
-const insertPalestrante = async (nome, titulo) => {
-  const [result] = await connection.execute(`
-    INSERT INTO palestrante (nome, titulo)
-    VALUES (?, ?);
-  `, [nome, titulo]);
+// Obter todos os palestrantes
+const findAllPalestrantes = () => pool.execute('SELECT * FROM palestrantes');
 
-  return result;
-};
+// Obter um palestrante por ID
+const findPalestranteById = (id) => pool.execute('SELECT * FROM palestrantes WHERE id = ?', [id]);
 
-const findAllPalestrantes = () => connection.execute(`
-  SELECT * FROM palestrante;
-`);
+// Criar um novo palestrante
+const createPalestrante = (palestrante) => pool.execute(
+  'INSERT INTO palestrantes (nome, titulo) VALUES (?, ?)',
+  [palestrante.nome, palestrante.titulo]
+);
 
-const findPalestrantesId = (id) => connection.execute(`
-  SELECT * FROM palestrante WHERE id = ?
-`, [id]);
+// Atualizar um palestrante existente
+const updatePalestrante = (id, palestrante) => pool.execute(
+  'UPDATE palestrantes SET nome = ?, titulo = ? WHERE id = ?',
+  [palestrante.nome, palestrante.titulo, id]
+);
 
-const updatePalestrantes = (id, palestrante) => connection.execute(`
-  UPDATE palestrante
-  SET nome = ?, titulo = ?
-  WHERE id = ?
-`, [palestrante.nome, palestrante.titulo, id]);
+// Excluir um palestrante
+const deletePalestrante = (id) => pool.execute('DELETE FROM palestrantes WHERE id = ?', [id]);
 
-const deletePalestrantes = (id) => connection.execute(`
-  DELETE FROM palestrante where id = ?
-`, [id]);
-
+// Verificar se um palestrante existe pelo ID
+const existsPalestranteById = (id) => pool.execute(
+  'SELECT COUNT(*) AS total FROM palestrantes WHERE id = ?',
+  [id]
+).then(([rows]) => rows[0].total > 0);
 
 module.exports = {
-  insertPalestrante,
   findAllPalestrantes,
-  findPalestrantesId,
-  updatePalestrantes,
-  deletePalestrantes
+  findPalestranteById,
+  createPalestrante,
+  updatePalestrante,
+  deletePalestrante,
+  existsPalestranteById
 };
