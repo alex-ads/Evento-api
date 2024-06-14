@@ -1,52 +1,75 @@
 const express = require('express');
 const router = express.Router();
-const { insertEvento, findAllEventos, findEventoById, updateEvento, deleteEvento } = require("../db/eventoQueries");
 const rescue = require('express-rescue');
+const { findAllEventos, findEventoById, createEvento, updateEvento, deleteEvento, existsEventoByDataLocal } = require('../db/eventoQueries');
+const { findPalestrasByEvento } = require('../db/palestraQueries'); // Para obter palestras do evento
 
-router.post("/", rescue(async (req, res) => {
-    const { nome, data, horario, local } = req.body;
-    const result = await insertEvento(nome, data, horario, local);
-
-    return res.status(201).json({ message: `Evento cadastrado com o id ${result.insertId}` });
+// GET /eventos
+router.get('/', rescue(async (req, res) => {
+    const eventos = await findAllEventos();
+    res.json(eventos);
 }));
 
-router.get("/", rescue(async (req, res) => {
-    const [result] = await findAllEventos();
-    return res.status(200).json(result);
+// GET /eventos/:id
+router.get('/:id', rescue(async (req, res) => {
+    const evento = await findEventoById(req.params.id);
+    if (!evento) return res.status(404).json({ message: "Evento não encontrado!" });
+    const palestras = await findPalestrasByEvento(req.params.id); // Obter palestras do evento
+    res.json({ ...evento, palestras }); // Retornar evento com palestras
 }));
 
-router.get("/:id", rescue(async (req, res) => {
-    const { id } = req.params;
-    const [[result]] = await findEventoById(id)
+// POST /eventos
+router.post('/', rescue(async (req, res) => {
+    const { nome, data_inicio, data_fim, local } = req.body;
 
-    if (!result) {
-        return res.status(404).json({ message: "Evento não encontrado!" })
+    // Validações
+    if (!nome || !data_inicio || !data_fim || !local) {
+        return res.status(400).json({ message: "Nome, data de início, data de fim e local são obrigatórios." });
     }
 
-    return res.status(200).json(result)
-}));
-
-router.put("/:id", rescue(async (req, res) => {
-    const { id } = req.params;
-    const evento = req.body;
-    const [result] = await updateEvento(id, evento);
-
-    if (result.affectedRows === 0) {
-        return res.status(400).json({ message: "Nenhuma alteração realizada. Tente com outros dados" })
+    // Verificar se já existe um evento com as mesmas datas e local
+    if (await existsEventoByDataLocal(data_inicio, data_fim, local)) {
+        return res.status(400).json({ message: "Já existe um evento neste local e data!" });
     }
 
-    return res.status(200).json({ message: `Evento com o id ${id} atualizado com sucesso!` });
-}));
-
-router.delete("/:id", rescue(async (req, res) => {
-    const { id } = req.params;
-    const [result] = await deleteEvento(id);
-
-    if (result.affectedRows === 0) {
-        return res.status(400).json({ message: "Nenhuma alteração realizada. Tente com outros dados" })
+    // Validação para garantir que data_fim seja posterior a data_inicio (opcional)
+    if (new Date(data_fim) <= new Date(data_inicio)) {
+        return res.status(400).json({ message: "A data de fim deve ser posterior à data de início." });
     }
 
-    return res.status(200).json({ message: `Evento com o id ${id} foi deletado com sucesso!` });
+    // Criar o evento
+    const id = await createEvento(req.body);
+    res.status(201).json({ id, message: "Evento criado com sucesso!" });
 }));
+
+
+// PUT /eventos/:id
+router.put('/:id', rescue(async (req, res) => {
+    const { nome, data_inicio, data_fim, local } = req.body;
+
+    // Validações
+    if (!nome || !data_inicio || !data_fim || !local) {
+        return res.status(400).json({ message: "Nome, data de início, data de fim e local são obrigatórios." });
+    }
+    if (await existsEventoByDataLocal(data_inicio, data_fim, local, req.params.id)) {
+        return res.status(400).json({ message: "Já existe um evento neste local e data!" });
+    }
+    const evento = await findEventoById(req.params.id);
+    if (!evento) return res.status(404).json({ message: "Evento não encontrado!" });
+    // Validação para garantir que data_fim seja posterior a data_inicio (opcional)
+
+    await updateEvento(req.params.id, req.body);
+    res.json({ message: "Evento atualizado com sucesso!" });
+}));
+
+// DELETE /eventos/:id
+router.delete('/:id', rescue(async (req, res) => {
+    const evento = await findEventoById(req.params.id);
+    if (!evento) return res.status(404).json({ message: "Evento não encontrado!" });
+    await deleteEvento(req.params.id);
+    res.json({ message: "Evento excluído com sucesso!" });
+}));
+
+// GET /eventos/:eventoId/palestras (já implementado na rota de palestras)
 
 module.exports = router;
