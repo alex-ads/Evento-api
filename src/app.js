@@ -3,6 +3,8 @@ const express = require("express");
 const palestranteRoute = require("./routes/palestranteRoutes");
 const eventoRoute = require("./routes/eventoRoutes");
 const palestraRoute = require("./routes/palestraRoutes");
+const eventoPalestraRoute = require("./routes/eventoPalestraRoutes");
+
 
 require("express-async-errors");
 
@@ -17,6 +19,7 @@ app.get("/", (req, res) => {
 app.use("/palestrante", palestranteRoute);
 app.use("/evento", eventoRoute);
 app.use("/palestra", palestraRoute);
+app.use("/eventoPalestra", eventoPalestraRoute);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -24,3 +27,6 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
+
+
+//Resta apenas a rota post de Evento
