@@ -27,6 +27,3 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
-
-
-//Resta apenas a rota post de Evento
