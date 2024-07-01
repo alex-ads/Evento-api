@@ -28,7 +28,6 @@ router.post('/', rescue(async (req, res) => {
   if (!(await existsPalestranteById(palestrante_id))) {
     return res.status(400).json({ message: "Palestrante não cadastrado!" });
   }
-  // Validação da data e hora (opcional, se necessário)
 
   const id = await createPalestra(req.body);
   res.status(201).json({ id, message: "Palestra criada com sucesso!" });
@@ -47,7 +46,6 @@ router.put('/:id', rescue(async (req, res) => {
   }
   const palestra = await findPalestraById(req.params.id);
   if (!palestra) return res.status(404).json({ message: "Palestra não encontrada!" });
-  // Validação da data e hora (opcional, se necessário)
 
   await updatePalestra(req.params.id, req.body);
   res.json({ message: "Palestra atualizada com sucesso!" });

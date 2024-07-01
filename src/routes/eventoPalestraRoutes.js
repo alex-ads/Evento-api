@@ -9,7 +9,7 @@ const { findPalestraById } = require('../db/palestraQueries');
 router.post('/eventos/:eventoId/palestras/:palestraId', rescue(async (req, res) => {
   const { eventoId, palestraId } = req.params;
 
-  // Validações (eventoId, palestraId) - Implemente as validações necessárias aqui
+  // Validações (eventoId, palestraId)
   const evento = await findEventoById(eventoId);
   if (!evento) return res.status(404).json({ message: "Evento não encontrado!" });
   const palestra = await findPalestraById(palestraId);
@@ -23,7 +23,7 @@ router.post('/eventos/:eventoId/palestras/:palestraId', rescue(async (req, res) 
 router.delete('/eventos/:eventoId/palestras/:palestraId', rescue(async (req, res) => {
   const { eventoId, palestraId } = req.params;
 
-  // Validações (eventoId, palestraId) - Implemente as validações necessárias aqui
+  // Validações (eventoId, palestraId) 
   const evento = await findEventoById(eventoId);
   if (!evento) return res.status(404).json({ message: "Evento não encontrado!" });
   const palestra = await findPalestraById(palestraId);

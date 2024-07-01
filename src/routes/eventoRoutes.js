@@ -32,7 +32,6 @@ router.post('/', rescue(async (req, res) => {
         return res.status(400).json({ message: "Já existe um evento neste local e data!" });
     }
 
-    // Validação para garantir que data_fim seja posterior a data_inicio (opcional)
     if (new Date(data_fim) <= new Date(data_inicio)) {
         return res.status(400).json({ message: "A data de fim deve ser posterior à data de início." });
     }
@@ -56,7 +55,6 @@ router.put('/:id', rescue(async (req, res) => {
     }
     const evento = await findEventoById(req.params.id);
     if (!evento) return res.status(404).json({ message: "Evento não encontrado!" });
-    // Validação para garantir que data_fim seja posterior a data_inicio (opcional)
 
     await updateEvento(req.params.id, req.body);
     res.json({ message: "Evento atualizado com sucesso!" });
@@ -70,6 +68,5 @@ router.delete('/:id', rescue(async (req, res) => {
     res.json({ message: "Evento excluído com sucesso!" });
 }));
 
-// GET /eventos/:eventoId/palestras (já implementado na rota de palestras)
 
 module.exports = router;
