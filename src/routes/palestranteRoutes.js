@@ -32,6 +32,7 @@ router.post('/', rescue(async (req, res) => {
     res.status(201).json({ id, message: "Palestrante criado com sucesso!" });
 }));
 
+
 // PUT /palestrantes/:id
 router.put('/:id', rescue(async (req, res) => {
     const { nome, titulo } = req.body;

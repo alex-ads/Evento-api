@@ -1,31 +1,47 @@
 const pool = require('./connection');
 
 // Obter todos os palestrantes
-const findAllPalestrantes = () => pool.execute('SELECT * FROM palestrantes');
+const findAllPalestrantes = async () => {
+  const [rows] = await pool.execute('SELECT * FROM palestrantes');
+  return rows;
+};
 
 // Obter um palestrante por ID
-const findPalestranteById = (id) => pool.execute('SELECT * FROM palestrantes WHERE id = ?', [id]);
+const findPalestranteById = async (id) => {
+  const [rows] = await pool.execute('SELECT * FROM palestrantes WHERE id = ?', [id]);
+  return rows[0] || null;
+};
 
 // Criar um novo palestrante
-const createPalestrante = (palestrante) => pool.execute(
-  'INSERT INTO palestrantes (nome, titulo) VALUES (?, ?)',
-  [palestrante.nome, palestrante.titulo]
-);
+const createPalestrante = async (palestrante) => {
+  const [result] = await pool.execute(
+    'INSERT INTO palestrantes (nome, titulo) VALUES (?, ?)',
+    [palestrante.nome, palestrante.titulo]
+  );
+  return result.insertId;
+};
 
 // Atualizar um palestrante existente
-const updatePalestrante = (id, palestrante) => pool.execute(
-  'UPDATE palestrantes SET nome = ?, titulo = ? WHERE id = ?',
-  [palestrante.nome, palestrante.titulo, id]
-);
+const updatePalestrante = async (id, palestrante) => {
+  await pool.execute(
+    'UPDATE palestrantes SET nome = ?, titulo = ? WHERE id = ?',
+    [palestrante.nome, palestrante.titulo, id]
+  );
+};
 
 // Excluir um palestrante
-const deletePalestrante = (id) => pool.execute('DELETE FROM palestrantes WHERE id = ?', [id]);
+const deletePalestrante = async (id) => {
+  await pool.execute('DELETE FROM palestrantes WHERE id = ?', [id]);
+};
 
 // Verificar se um palestrante existe pelo ID
-const existsPalestranteById = (id) => pool.execute(
-  'SELECT COUNT(*) AS total FROM palestrantes WHERE id = ?',
-  [id]
-).then(([rows]) => rows[0].total > 0);
+const existsPalestranteById = async (id) => {
+  const [rows] = await pool.execute(
+    'SELECT COUNT(*) AS total FROM palestrantes WHERE id = ?',
+    [id]
+  );
+  return rows[0].total > 0;
+};
 
 module.exports = {
   findAllPalestrantes,

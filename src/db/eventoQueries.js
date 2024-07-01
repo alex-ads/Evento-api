@@ -1,25 +1,38 @@
 const pool = require('./connection');
 
 // Obter todos os eventos
-const findAllEventos = () => pool.execute('SELECT * FROM eventos');
+const findAllEventos = async () => {
+  const [rows] = await pool.execute('SELECT * FROM eventos');
+  return rows;
+};
 
 // Obter um evento por ID
-const findEventoById = (id) => pool.execute('SELECT * FROM eventos WHERE id = ?', [id]);
+const findEventoById = async (id) => {
+  const [rows] = await pool.execute('SELECT * FROM eventos WHERE id = ?', [id]);
+  return rows[0];
+};
 
 // Criar um novo evento
-const createEvento = (evento) => pool.execute(
-  'INSERT INTO eventos (nome, data_inicio, data_fim, local) VALUES (?, ?, ?, ?)',
-  [evento.nome, evento.data_inicio, evento.data_fim, evento.local]
-);
+const createEvento = async (evento) => {
+  const [result] = await pool.execute(
+    'INSERT INTO eventos (nome, data_inicio, data_fim, local) VALUES (?, ?, ?, ?)',
+    [evento.nome, evento.data_inicio, evento.data_fim, evento.local]
+  );
+  return result.insertId;
+};
 
 // Atualizar um evento existente
-const updateEvento = (id, evento) => pool.execute(
-  'UPDATE eventos SET nome = ?, data_inicio = ?, data_fim = ?, local = ? WHERE id = ?',
-  [evento.nome, evento.data_inicio, evento.data_fim, evento.local, id]
-);
+const updateEvento = async (id, evento) => {
+  await pool.execute(
+    'UPDATE eventos SET nome = ?, data_inicio = ?, data_fim = ?, local = ? WHERE id = ?',
+    [evento.nome, evento.data_inicio, evento.data_fim, evento.local, id]
+  );
+};
 
 // Excluir um evento
-const deleteEvento = (id) => pool.execute('DELETE FROM eventos WHERE id = ?', [id]);
+const deleteEvento = async (id) => {
+  await pool.execute('DELETE FROM eventos WHERE id = ?', [id]);
+};
 
 const existsEventoByDataLocal = async (data_inicio, data_fim, local, id = null) => {
   // Converter datas para o formato correto, se necessário
@@ -47,7 +60,6 @@ const existsEventoByDataLocal = async (data_inicio, data_fim, local, id = null) 
   const [rows] = await pool.execute(query, params);
   return rows[0].total > 0;
 };
-
 
 module.exports = {
   findAllEventos,

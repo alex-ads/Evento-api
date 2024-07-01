@@ -6,15 +6,15 @@ const { existsPalestranteById } = require('../db/palestranteQueries');
 
 // GET /palestras
 router.get('/', rescue(async (req, res) => {
-  const palestras = await findAllPalestras();
+  const [palestras] = await findAllPalestras();
   res.json(palestras);
 }));
 
 // GET /palestras/:id
 router.get('/:id', rescue(async (req, res) => {
-  const palestra = await findPalestraById(req.params.id);
-  if (!palestra) return res.status(404).json({ message: "Palestra não encontrada!" });
-  res.json(palestra);
+  const [palestra] = await findPalestraById(req.params.id);
+  if (!palestra.length) return res.status(404).json({ message: "Palestra não encontrada!" });
+  res.json(palestra[0]);
 }));
 
 // POST /palestras
@@ -66,5 +66,6 @@ router.get('/:palestranteId/palestras', rescue(async (req, res) => {
   const palestras = await findPalestrasByPalestrante(req.params.palestranteId);
   res.json(palestras);
 }));
+
 
 module.exports = router;
